@@ -3,14 +3,17 @@ import 'package:deviceconfigviewer/platform.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-void main() => runApp(ProviderScope(child: MaterialApp(home: RootWidget2())));
+void main() =>
+    runApp(const ProviderScope(child: MaterialApp(home: RootWidget())));
 
-class RootWidget2 extends ConsumerWidget {
+class RootWidget extends ConsumerWidget {
+  const RootWidget({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context,
       T Function<T>(ProviderBase<Object, T> provider) watch) {
     AsyncValue<List<DeviceConfigCategory>> categories =
-    watch(MyPlatform.deviceConfigsState);
+        watch(MyPlatform.deviceConfigsState);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Device Config Viewer'),
@@ -18,25 +21,25 @@ class RootWidget2 extends ConsumerWidget {
       ),
       body: categories.when(
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, stackTrace) =>
-              Center(child: Text(error.toString())),
+          error: (error, stackTrace) => Center(child: Text(error.toString())),
           data: (value) {
             return RefreshIndicator(
               onRefresh: () async {
                 await context.refresh(MyPlatform.deviceConfigsState);
               },
-
-              child: TabPage2(categories: value,),
+              child: TabPage(
+                categories: value,
+              ),
             );
           }),
     );
   }
 }
 
-class TabPage2 extends StatelessWidget {
+class TabPage extends StatelessWidget {
   final List<DeviceConfigCategory> categories;
 
-  const TabPage2({Key? key, required this.categories}) : super(key: key);
+  const TabPage({Key? key, required this.categories}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -48,30 +51,32 @@ class TabPage2 extends StatelessWidget {
           flexibleSpace: SafeArea(
             child: TabBar(
               isScrollable: true,
-              tabs: categories.map((e) => Tab(text: e.name,)).toList(),
+              tabs: categories
+                  .map((e) => Tab(
+                        text: e.name,
+                      ))
+                  .toList(),
             ),
           ),
         ),
         body: TabBarView(
-          children: categories.map((e) => ConfigListWidget2(e.configs))
-              .toList(),
+          children: categories.map((e) => ConfigListWidget(e.configs)).toList(),
         ),
       ),
     );
   }
 }
 
-class ConfigListWidget2 extends StatelessWidget {
-
+class ConfigListWidget extends StatelessWidget {
   final List<DeviceConfig> configs;
 
-  const ConfigListWidget2(this.configs, {Key? key}) : super(key: key);
+  const ConfigListWidget(this.configs, {Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Scrollbar(
-        child:  ListView.builder(
+        body: Scrollbar(
+      child: ListView.builder(
         itemBuilder: (BuildContext context, int index) {
           return Container(
               decoration: const BoxDecoration(
@@ -89,7 +94,6 @@ class ConfigListWidget2 extends StatelessWidget {
         },
         itemCount: configs.length,
       ),
-      )
-    );
+    ));
   }
 }
